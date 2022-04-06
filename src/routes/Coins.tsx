@@ -6,6 +6,8 @@ import styled from 'styled-components';
 // styled-components
 const Container = styled.div`
   padding: 0px 20px;
+  max-width: 480px;
+  margin: 0 auto;
 `;
 
 const Header = styled.header`
@@ -13,6 +15,8 @@ const Header = styled.header`
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 60px;
+  margin-bottom: 10px;
 `;
 
 const CoinList = styled.ul``;
