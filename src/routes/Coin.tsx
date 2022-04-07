@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
+import { useQuery } from 'react-query';
 import { useLocation, useParams, Switch, Route, Link, useRouteMatch } from 'react-router-dom'
 import styled from 'styled-components';
+import { fetchCoinInfo, fetchCoinTickers } from '../api';
 import Chart from './Chart';
 import Price from './Price';
 
@@ -157,32 +159,30 @@ interface PriceData {
 
 
 function Coin() {
-  const [loading, setLoading] = useState(true);
-  const [info, setInfo] = useState<InfoData>();
-  const [priceInfo, setPriceInfo] = useState<PriceData>();
-
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
 
   const priceMatch = useRouteMatch("/:coinId/price");
   const chartMatch = useRouteMatch("/:coinId/chart");
 
-  useEffect(() => {
-    (async () => {
-      const infoData = await (
-        await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-      ).json();
-      // console.log(infoData)
-      const priceData = await (
-        await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-      ).json();
-      // console.log(priceData)
-      setInfo(infoData);
-      setPriceInfo(priceData);
-      setLoading(false);
-    })()
-  }, [coinId])
 
+  // isLoading과 data가 두 개를 갖게 되기 때문에
+  // Object의 property를 가져오고 syntax를 이용해 이름을 바꿔줌
+  const { isLoading: infoLoading, data: infoData } = useQuery<InfoData>(
+    // key 값은 고유해야하기 때문에 [] 안에 첫번째 key가 카테고리 역할을 하고 두번째가 고유의 역할을 한다.
+    ["info", coinId],
+    // argument가 필요하기 때문에 익명의 함수로 fetcher 함수 불러와 return
+    () => fetchCoinInfo(coinId)
+  )
+  const { isLoading: tickersLoading, data: tickersData } = useQuery<PriceData>(
+    // key 값은 고유해야하기 때문에 [] 안에 첫번째 key가 카테고리 역할을 하고 두번째가 고유의 역할을 한다.
+    ["tickers", coinId],
+    // argument가 필요하기 때문에 익명의 함수로 fetcher 함수 불러와 return
+    () => fetchCoinTickers(coinId)
+  )
+
+  // 로딩을 하나로 묶어줌
+  const loading = infoLoading || tickersLoading;
 
   return (
     <Container>
@@ -190,8 +190,7 @@ function Coin() {
         <GoBack>← Back</GoBack>
       </Link>
       <Header>
-        {/* state가 있으면 name를 보여주고 아니면 로딩중 */}
-        <Title>{state?.name ? state.name : loading ? "로딩중..." : info?.name}</Title>
+        <Title>{state?.name ? state.name : loading ? "로딩중..." : infoData?.name}</Title>
       </Header>
       {loading ? (
         <Loader>로딩중...</Loader>
@@ -200,35 +199,39 @@ function Coin() {
           <Overview>
             <OverviewItem>
               <span>Rank:</span>
-              <span>{info?.rank}</span>
+              <span>{infoData?.rank}</span>
             </OverviewItem>
             <OverviewItem>
               <span>Symbol:</span>
-              <span>{info?.symbol}</span>
+              <span>{infoData?.symbol}</span>
             </OverviewItem>
             <OverviewItem>
               <span>Open Source:</span>
-              <span>{info?.open_source ? "Yes" : "No"}</span>
+              <span>{infoData?.open_source ? "Yes" : "No"}</span>
             </OverviewItem>
           </Overview>
-          <Description>{info?.description}</Description>
+          <Description>{infoData?.description}</Description>
           <Overview>
             <OverviewItem>
               <span>Total Supply:</span>
-              <span>{priceInfo?.total_supply}</span>
+              <span>{tickersData?.total_supply}</span>
             </OverviewItem>
             <OverviewItem>
               <span>Max Supply:</span>
-              <span>{priceInfo?.max_supply}</span>
+              <span>{tickersData?.max_supply}</span>
             </OverviewItem>
           </Overview>
 
           <Tabs>
             <Tab isActive={chartMatch !== null}>
-              <Link to={`/${coinId}/chart`}>Chart</Link>
+              <Link to={`/${coinId}/chart`}>
+                Chart
+              </Link>
             </Tab>
             <Tab isActive={priceMatch !== null}>
-              <Link to={`/${coinId}/price`}>Price</Link>
+              <Link to={`/${coinId}/price`}>
+                Price
+              </Link>
             </Tab>
           </Tabs>
 

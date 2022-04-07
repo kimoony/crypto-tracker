@@ -1,6 +1,7 @@
 import React from 'react';
 import { createGlobalStyle } from 'styled-components';
 import Router from './Router';
+import { ReactQueryDevtools } from 'react-query/devtools'
 
 // styled-components 로 reset.css 적용
 // createGlobalStyle - 렌더링 될 때 컴포넌트는 전역 스코프에 스타일들을 올려준다.
@@ -75,6 +76,7 @@ function App() {
     <>
       <GlobalStyled />
       <Router />
+      <ReactQueryDevtools initialIsOpen={true} />
     </>
   );
 }
