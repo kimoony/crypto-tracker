@@ -1,6 +1,5 @@
 import React from 'react'
 import { useQuery } from 'react-query';
-import styled from 'styled-components';
 import { fetchCoinHistory } from '../api';
 import ApexChart from 'react-apexcharts';
 
@@ -18,6 +17,14 @@ interface IHistorical {
   market_cap: number;
 }
 
+interface IohlcvData {
+  time_close: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
 interface ChartProps {
   coinId: string;
 }
@@ -26,8 +33,15 @@ function Chart({ coinId }: ChartProps) {
   const { isLoading, data } = useQuery<IHistorical[]>(
     ["ohlcv", coinId],
     () => fetchCoinHistory(coinId),
-    { refetchInterval: 10000, }
+    // { refetchInterval: 10000, }
   );
+
+  const ohlcvData = data?.map((data: IohlcvData) => ({
+    x: data.time_close,
+    y: [data.open.toFixed(2), data.high.toFixed(2), data.low.toFixed(2), data.close.toFixed(2)],
+  }));
+
+
 
   return (
     <div>
@@ -35,13 +49,8 @@ function Chart({ coinId }: ChartProps) {
         "차트 로딩중..."
       ) : (
         <ApexChart
-          type="line"
-          series={[
-            {
-              name: "Price",
-              data: data?.map(price => price.close) as number[],
-            },
-          ]}
+          type="candlestick"
+          series={[{ data: ohlcvData }] as unknown as number[]}
           options={{
             chart: {
               height: 300,
@@ -71,19 +80,23 @@ function Chart({ coinId }: ChartProps) {
               type: "datetime",
               categories: data?.map(date => date.time_close) as string[],
             },
-            fill: {
-              type: "gradient",
-              gradient: {
-                gradientToColors: ["#0f59f9"],
-                stops: [0, 100]
-              },
-            },
             tooltip: {
-              y: {
-                formatter: (value) => `$ ${value.toFixed(2)}`,
-              },
+              // y: {
+              //   formatter: (value) => `$ ${value.toFixed(2)}`,
+              // },
               marker: {
                 show: false
+              }
+            },
+            plotOptions: {
+              candlestick: {
+                colors: {
+                  upward: '#00B746',
+                  downward: '#EF403C'
+                },
+                wick: {
+                  useFillColor: true
+                }
               }
             }
           }}
