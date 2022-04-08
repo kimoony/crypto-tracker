@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useQuery } from 'react-query';
+import { Helmet } from 'react-helmet';
 import { useLocation, useParams, Switch, Route, Link, useRouteMatch } from 'react-router-dom'
 import styled from 'styled-components';
 import { fetchCoinInfo, fetchCoinTickers } from '../api';
@@ -133,8 +134,8 @@ interface PriceData {
   beta_value: number;
   first_data_at: string;
   last_updated: string;
-  quote: {
-    usd: {
+  quotes: {
+    USD: {
       ath_date: string;
       ath_price: number;
       market_cap: number;
@@ -165,7 +166,6 @@ function Coin() {
   const priceMatch = useRouteMatch("/:coinId/price");
   const chartMatch = useRouteMatch("/:coinId/chart");
 
-
   // isLoading과 data가 두 개를 갖게 되기 때문에
   // Object의 property를 가져오고 syntax를 이용해 이름을 바꿔줌
   const { isLoading: infoLoading, data: infoData } = useQuery<InfoData>(
@@ -178,7 +178,10 @@ function Coin() {
     // key 값은 고유해야하기 때문에 [] 안에 첫번째 key가 카테고리 역할을 하고 두번째가 고유의 역할을 한다.
     ["tickers", coinId],
     // argument가 필요하기 때문에 익명의 함수로 fetcher 함수 불러와 return
-    () => fetchCoinTickers(coinId)
+    () => fetchCoinTickers(coinId),
+    {
+      refetchInterval: 5000,
+    }
   )
 
   // 로딩을 하나로 묶어줌
@@ -186,11 +189,18 @@ function Coin() {
 
   return (
     <Container>
+      <Helmet>
+        <title>
+          {state?.name ? state.name : loading ? "로딩중..." : infoData?.name}
+        </title>
+      </Helmet>
       <Link to="/">
         <GoBack>← Back</GoBack>
       </Link>
       <Header>
-        <Title>{state?.name ? state.name : loading ? "로딩중..." : infoData?.name}</Title>
+        <Title>
+          {state?.name ? state.name : loading ? "로딩중..." : infoData?.name}
+        </Title>
       </Header>
       {loading ? (
         <Loader>로딩중...</Loader>
@@ -206,8 +216,8 @@ function Coin() {
               <span>{infoData?.symbol}</span>
             </OverviewItem>
             <OverviewItem>
-              <span>Open Source:</span>
-              <span>{infoData?.open_source ? "Yes" : "No"}</span>
+              <span>Price:</span>
+              <span>{tickersData?.quotes.USD.price.toFixed(2)}</span>
             </OverviewItem>
           </Overview>
           <Description>{infoData?.description}</Description>
@@ -240,7 +250,7 @@ function Coin() {
               <Price />
             </Route>
             <Route path={`/${coinId}/chart`}>
-              <Chart />
+              <Chart coinId={coinId} />
             </Route>
           </Switch>
         </>
