@@ -29,6 +29,21 @@ const GoBack = styled.span`
   }
 `;
 
+const BtnWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  height: 10vh;
+  padding: 0px 7.5px;
+`;
+
+const Toggle = styled.button`
+  font-size: 30px;
+  border: none;
+  background-color: ${props => props.theme.bgColor};
+  cursor: pointer;
+  width: auto;
+`;
+
 const Header = styled.header`
   height: 10vh;
   display: flex;
@@ -49,7 +64,10 @@ const Loader = styled.span`
 const Overview = styled.div`
   display: flex;
   justify-content: space-between;
-  background-color: rgba(0,0,0,.5);
+  background-color: ${props => props.theme.bgColor};
+  color: ${props => props.theme.textColor};
+  border: 2px solid;
+  border-color: ${props => props.theme.textColor};
   padding: 10px 20px;
   border-radius: 10px;
   margin-top: 10px;
@@ -79,7 +97,9 @@ const Tab = styled.span<{ isActive: boolean }>`
   text-transform: uppercase;
   font-size: 12px;
   font-weight: 400;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: ${props => props.theme.bgColor};
+  border: 2px solid;
+  border-color: ${props => props.theme.textColor};
   padding: 7px 0px;
   border-radius: 10px;
   color: ${(props) =>
@@ -92,6 +112,8 @@ const Tab = styled.span<{ isActive: boolean }>`
 const Description = styled.p`
   margin: 20px 0px;
 `;
+
+
 
 
 
@@ -157,9 +179,13 @@ interface PriceData {
   };
 }
 
+interface ICoinProps {
+  isDark: boolean;
+  toggleTheme: () => void;
+}
 
 
-function Coin() {
+function Coin({ isDark, toggleTheme }: ICoinProps) {
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
 
@@ -194,9 +220,14 @@ function Coin() {
           {state?.name ? state.name : loading ? "로딩중..." : infoData?.name}
         </title>
       </Helmet>
-      <Link to="/">
-        <GoBack>← Back</GoBack>
-      </Link>
+      <BtnWrapper>
+        <Link to="/">
+          <GoBack>← Back</GoBack>
+        </Link>
+        <Toggle onClick={toggleTheme}>
+          {isDark ? "🌞" : "🌝"}
+        </Toggle>
+      </BtnWrapper>
       <Header>
         <Title>
           {state?.name ? state.name : loading ? "로딩중..." : infoData?.name}
@@ -250,7 +281,7 @@ function Coin() {
               <Price coinId={coinId} />
             </Route>
             <Route path={`/${coinId}/chart`}>
-              <Chart coinId={coinId} />
+              <Chart coinId={coinId} isDark={isDark} />
             </Route>
           </Switch>
         </>

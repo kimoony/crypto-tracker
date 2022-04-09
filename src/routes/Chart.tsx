@@ -27,9 +27,11 @@ interface IohlcvData {
 
 interface ChartProps {
   coinId: string;
+  isDark: boolean;
 }
 
-function Chart({ coinId }: ChartProps) {
+
+function Chart({ coinId, isDark }: ChartProps) {
   const { isLoading, data } = useQuery<IHistorical[]>(
     ["ohlcv", coinId],
     () => fetchCoinHistory(coinId),
@@ -54,14 +56,14 @@ function Chart({ coinId }: ChartProps) {
           options={{
             chart: {
               height: 300,
-              width: 500,
+              width: 480,
               toolbar: {
                 show: false,
               },
               background: "transparent",
             },
             theme: {
-              mode: 'dark'
+              mode: isDark ? 'dark' : "light"
             },
             stroke: {
               curve: "smooth",

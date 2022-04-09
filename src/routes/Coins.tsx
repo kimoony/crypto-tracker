@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
@@ -13,20 +13,31 @@ const Container = styled.div`
   margin: 0 auto;
 `;
 
-const Header = styled.header`
+const Toggle = styled.button`
+  font-size: 30px;
+  border: none;
+  background-color: ${props => props.theme.bgColor};
+  cursor: pointer;
+  width: 100%;
   height: 10vh;
+  text-align: right;
+`;
+
+const Header = styled.header`
+  /* height: 10vh; */
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 60px;
   margin-bottom: 10px;
 `;
 
 const CoinList = styled.ul``;
 
 const Coin = styled.li`
-  background-color: white;
-  color: ${props => props.theme.bgColor};
+  background-color: ${props => props.theme.bgColor};
+  color: ${props => props.theme.textColor};
+  border: 2px solid;
+  border-color: ${props => props.theme.textColor};
   border-radius: 15px;
   margin-bottom: 10px;
   a {
@@ -68,7 +79,12 @@ interface ICoin {
   type: string,
 }
 
-function Coins() {
+interface ICoinsProps {
+  toggleTheme: () => void;
+  isDark: boolean;
+}
+
+function Coins({ toggleTheme, isDark }: ICoinsProps) {
   // react query
   const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins)
 
@@ -92,6 +108,9 @@ function Coins() {
           코인
         </title>
       </Helmet>
+      <Toggle onClick={toggleTheme}>
+        {isDark ? "🌞" : "🌝"}
+      </Toggle>
       <Header>
         <Title>코인</Title>
       </Header>
