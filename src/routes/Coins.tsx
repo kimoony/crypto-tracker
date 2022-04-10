@@ -2,8 +2,10 @@ import React from 'react'
 import { Helmet } from 'react-helmet';
 import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import styled from 'styled-components';
 import { fetchCoins } from '../api';
+import { isDarkAtom } from '../atom';
 
 
 // styled-components
@@ -21,6 +23,9 @@ const Toggle = styled.button`
   width: 100%;
   height: 10vh;
   text-align: right;
+  &:hover {
+    font-size: 40px;
+  }
 `;
 
 const Header = styled.header`
@@ -80,11 +85,16 @@ interface ICoin {
 }
 
 interface ICoinsProps {
-  toggleTheme: () => void;
-  isDark: boolean;
+
 }
 
-function Coins({ toggleTheme, isDark }: ICoinsProps) {
+function Coins({ }: ICoinsProps) {
+  // recoil
+  const isDark = useRecoilValue(isDarkAtom)
+  // value를 설정하는 function
+  const setDarkAtom = useSetRecoilState(isDarkAtom)
+  const toggleDarkAtom = () => setDarkAtom((prev) => !prev)
+
   // react query
   const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins)
 
@@ -108,8 +118,8 @@ function Coins({ toggleTheme, isDark }: ICoinsProps) {
           코인
         </title>
       </Helmet>
-      <Toggle onClick={toggleTheme}>
-        {isDark ? "🌞" : "🌝"}
+      <Toggle onClick={toggleDarkAtom}>
+        <span>{isDark ? "☀️" : "🌙"}</span>
       </Toggle>
       <Header>
         <Title>코인</Title>

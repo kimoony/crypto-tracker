@@ -6,6 +6,8 @@ import styled from 'styled-components';
 import { fetchCoinInfo, fetchCoinTickers } from '../api';
 import Chart from './Chart';
 import Price from './Price';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { isDarkAtom } from '../atom';
 
 
 // styled components
@@ -41,7 +43,12 @@ const Toggle = styled.button`
   border: none;
   background-color: ${props => props.theme.bgColor};
   cursor: pointer;
-  width: auto;
+  width: 100%;
+  height: 10vh;
+  text-align: right;
+  &:hover {
+    font-size: 40px;
+  }
 `;
 
 const Header = styled.header`
@@ -180,12 +187,17 @@ interface PriceData {
 }
 
 interface ICoinProps {
-  isDark: boolean;
-  toggleTheme: () => void;
+
 }
 
 
-function Coin({ isDark, toggleTheme }: ICoinProps) {
+function Coin({ }: ICoinProps) {
+  // recoil
+  const isDark = useRecoilValue(isDarkAtom)
+  // value를 설정하는 function
+  const setDarkAtom = useSetRecoilState(isDarkAtom)
+  const toggleDarkAtom = () => setDarkAtom((prev) => !prev)
+
   const { coinId } = useParams<RouteParams>();
   const { state } = useLocation<RouteState>();
 
@@ -224,8 +236,8 @@ function Coin({ isDark, toggleTheme }: ICoinProps) {
         <Link to="/">
           <GoBack>← Back</GoBack>
         </Link>
-        <Toggle onClick={toggleTheme}>
-          {isDark ? "🌞" : "🌝"}
+        <Toggle onClick={toggleDarkAtom}>
+          <span>{isDark ? "☀️" : "🌙"}</span>
         </Toggle>
       </BtnWrapper>
       <Header>
@@ -281,7 +293,7 @@ function Coin({ isDark, toggleTheme }: ICoinProps) {
               <Price coinId={coinId} />
             </Route>
             <Route path={`/${coinId}/chart`}>
-              <Chart coinId={coinId} isDark={isDark} />
+              <Chart coinId={coinId} />
             </Route>
           </Switch>
         </>

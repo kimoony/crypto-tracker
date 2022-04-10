@@ -5,6 +5,8 @@ import { ReactQueryDevtools } from 'react-query/devtools';
 import { ThemeProvider } from 'styled-components';
 import { darkTheme, lightTheme } from './theme';
 import styled from 'styled-components';
+import { useRecoilValue } from 'recoil';
+import { isDarkAtom } from './atom';
 
 // styled-components 로 reset.css 적용
 // createGlobalStyle - 렌더링 될 때 컴포넌트는 전역 스코프에 스타일들을 올려준다.
@@ -77,14 +79,13 @@ a {
 
 
 function App() {
-  const [isDark, setIsDark] = useState(false);
-  const toggleTheme = () => setIsDark(current => !current)
+  const isDark = useRecoilValue(isDarkAtom)
 
   return (
     <>
       <ThemeProvider theme={isDark ? darkTheme : lightTheme}>
         <GlobalStyled />
-        <Router toggleTheme={toggleTheme} isDark={isDark} />
+        <Router />
         <ReactQueryDevtools initialIsOpen={true} />
       </ThemeProvider>
     </>
