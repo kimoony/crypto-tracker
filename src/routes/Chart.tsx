@@ -38,8 +38,10 @@ function Chart({ coinId }: ChartProps) {
   const { isLoading, data } = useQuery<IHistorical[]>(
     ["ohlcv", coinId],
     () => fetchCoinHistory(coinId),
-    // { refetchInterval: 10000, }
+    { refetchInterval: 10000, }
   );
+
+  // console.log(data)
 
   const ohlcvData = data?.map((data: IohlcvData) => ({
     x: data.time_close,
